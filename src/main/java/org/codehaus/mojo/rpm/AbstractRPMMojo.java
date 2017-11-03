@@ -43,6 +43,7 @@ import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectHelper;
 import org.apache.maven.settings.Server;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.shared.filtering.MavenFileFilter;
@@ -586,6 +587,13 @@ abstract class AbstractRPMMojo
     @Parameter(property="rpm.copyTo")
     private File copyTo;
 
+    /**
+     * Option to attach the created RPM to the project
+     * @since 2.2.0
+     */
+    @Parameter(property="rpm.attach", defaultValue = "false")
+    private boolean attach;
+
     //////////////////////////////////////////////////////////////////////////
 
     /**
@@ -602,6 +610,14 @@ abstract class AbstractRPMMojo
      */
     @Component( hint = "mng-4384" )
     private SecDispatcher securityDispatcher;
+
+    /**
+     * Maven ProjectHelper.
+     *
+     * @since 2.2.0
+     */
+    @Component
+    private MavenProjectHelper projectHelper;
 
     /**
      * Current user system settings for use in Maven.
@@ -716,6 +732,10 @@ abstract class AbstractRPMMojo
 
         if ( this.copyTo != null ) {
         	makeSecondCopy();
+        }
+
+        if (this.attach) {
+            projectHelper.attachArtifact( project, "rpm", this.getRPMFile() );
         }
     }
 
